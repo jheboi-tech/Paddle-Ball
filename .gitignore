@@ -1,0 +1,4 @@
+# This makes sure that any vscode settings
+# are not tracked by git. This will not
+# be editor specific.
+.vscode/*
