@@ -5,24 +5,31 @@ const seconds_per_frame = 1 / frames_per_second;
 const milliseconds_per_frame = seconds_per_frame / 1000;
 
 // Create the canvas object as a global variable.
-
-var canvas = null;
-var ctx = null;
+let game = new Game();
+let canvas = null;
+let ctx = null;
 var frame = 0;
 
 /**
  * Function draws all the elements to the
  * frame.
  */
-function draw() {
-    console.log("Draw frame" + frame++);
+const draw = () => {
+    // console.log("Draw frame" + frame++);
+    if (game.game_over != true) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        game.update(seconds_per_frame);
+    } else {
+        console.log("Show game menu.");
+    }
+
 }
 
 /**
  * This main function is the function that kicks
  * off the application.
  */
-function main() {
+const main = () => {
     // Kick off the frame drawing process.
     // This will cause the function "draw"
     // to be run every "milliseconds_per_frame".
@@ -38,5 +45,7 @@ function main() {
 window.addEventListener('load', function () {
     canvas = document.getElementById("myCanvas");
     ctx = canvas.getContext("2d");
+    game.attachContext(canvas, ctx);
+    game.start();
     main();
 }, false);
