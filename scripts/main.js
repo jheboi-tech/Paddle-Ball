@@ -16,8 +16,13 @@ var frame = 0;
  */
 const draw = () => {
     // console.log("Draw frame" + frame++);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    game.update();
+    if (game.game_over != true) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        game.update(seconds_per_frame);
+    } else {
+        console.log("Show game menu.");
+    }
+
 }
 
 /**
@@ -40,7 +45,7 @@ const main = () => {
 window.addEventListener('load', function () {
     canvas = document.getElementById("myCanvas");
     ctx = canvas.getContext("2d");
-    game.attachContext(ctx);
+    game.attachContext(canvas, ctx);
     game.start();
     main();
 }, false);
