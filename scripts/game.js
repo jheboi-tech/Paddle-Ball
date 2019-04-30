@@ -8,7 +8,8 @@ class Game {
         this._score = 0;
         this._canvas = null;
         this._ctx = null;
-        this._objects = [];
+        this._balls = [];
+        this._paddle = null;
 
         // Define X and Y boundaries.
         this._min_x = null;
@@ -21,27 +22,55 @@ class Game {
         console.log("The game is initialised.");
     }
 
+    /**
+     * Return whether the game is over.
+     * Returns True if game is over.
+     * Returns False if game is still going.
+     */
     get game_over() {
         return this._game_over;
     }
 
+    /**
+     * Link the canvas and context objects to the
+     * Game class.
+     * @param {*} canvas
+     * @param {*} context
+     */
     attachContext(canvas, context) {
         console.log("Context has been initialised!");
         this._ctx = context;
         this._canvas = canvas;
     }
 
+    /**
+     * Start the game.
+     * Initialises all object that will be used in the
+     * game and sets up event handlers.
+     */
     start() {
         // Add objects to the ball.
-        let ball = new Ball({context: this._ctx, x: this._canvas.width / 2, y: this._canvas.height / 2});
-        ball.randomise();
-        this._objects.push(ball);
+        let ball = new Ball({
+            canvas: this._canvas,
+            context: this._ctx
+        });
+        this._balls.push(ball);
+
+        this._paddle = new Paddle({
+            canvas: this._canvas,
+            context: this._ctx,
+            speed: 20
+        });
 
         // Create the main boundaries.
         this._min_x = 0;
         this._min_y = 0;
         this._max_x = this._canvas.width;
         this._max_y = this._canvas.height;
+
+        // Attach the input to the paddle's controller.
+        document.addEventListener('keydown', this._paddle.keyDownHandler, false);
+        document.addEventListener('keyup', this._paddle.keyUpHandler, false);
     }
 
     /**
@@ -49,23 +78,30 @@ class Game {
      * @param {*} dt Time between last frame and current frame.
      */
     update(dt) {
-        // Draw all the objects attached to the game.
-        this._objects.map((object) => {
-            // Check for side wall collisions.
-            if (((object.x + object.radius) >= this._max_x) || ((object.x - object.radius) <= this._min_x)) {
-                object.dx = -object.dx;
+        // Draw the ball instances of
+        this._balls.map((ball) => {
+            if (((ball.x + ball.radius) >= this._max_x) || ((ball.x - ball.radius) <= this._min_x)) {
+                // Add a random number at the end to randomise the
+                // ball's movement a bit.
+                ball.dx = -ball.dx;
             }
-            // Check for top wall collision.
-            if ((object.y + object.radius) >= this._max_y) {
+            /*// Check for top wall collision.
+            if ((ball.y + ball.radius) >= this._max_y) {
                 this._game_over = true;
-            }
-            if ((object.y - object.radius) <= this._min_y) {
-                object.dy = -object.dy;
+            }*/
+            if (((ball.y - ball.radius) <= this._min_y) || ((ball.y + ball.radius) >= this._max_y)) {
+                // Add a random number at the end to randomise the
+                // ball's movement a bit.
+                ball.dy = -ball.dy;
             }
 
-            object.move({dt: dt});
-            object.draw();
+            ball.move({ dt: dt });
+            ball.draw();
         });
+
+        // Draw the paddle.
+        this._paddle.move({ dt: dt });
+        this._paddle.draw();
     }
 }
 
@@ -73,12 +109,12 @@ class Game {
  * Class that defines the ball.
  */
 class Ball {
-    constructor({context = null, x = 0, y = 0, radius = 10}) {
+    constructor({ context = null, x = 100, y = 100, radius = 10 }) {
         this._ctx = context;
         this._x = x; // X-Coordinate
         this._y = y; // Y-Coordinate
-        this._dx = 0; // X-Speed.
-        this._dy = 0; // Y-Speed.
+        this._dx = 10; // X-Speed.
+        this._dy = 10; // Y-Speed.
         this._radius = radius;
     }
 
@@ -116,14 +152,8 @@ class Ball {
         return this._y;
     }
 
-    randomise() {
-        this._dx = (Math.random() - 0.5) + 30;
-        this._dy = (Math.random() - 0.5) + 30;
-        this._radius = (Math.random() * 20) + 5;
-    }
-
     // Move the ball with velocities dx and dy.
-    move({dt = 0}) {
+    move({ dt = 0 }) {
         // Update position with speed.
         this._x = (this._dx * dt) + this._x;
         this._y = (this._dy * dt) + this._y;
