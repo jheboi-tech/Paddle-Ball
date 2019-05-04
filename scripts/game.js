@@ -52,14 +52,30 @@ class Game {
         // Add objects to the ball.
         let ball = new Ball({
             canvas: this._canvas,
-            context: this._ctx
+            context: this._ctx,
+            radius: 30,
+            dx: 40,
+            dy: 10
         });
         this._balls.push(ball);
+
+        let ball2 = new Ball({
+            canvas: this._canvas,
+            context: this._ctx,
+            x: 40,
+            y: 60,
+            dx: -10,
+            dy: -10
+        });
+        this._balls.push(ball2);
 
         this._paddle = new Paddle({
             canvas: this._canvas,
             context: this._ctx,
-            speed: 20
+            speed: 20,
+            width: 60,
+            speed: 60,
+            height: 60
         });
 
         // Create the main boundaries.
@@ -85,15 +101,26 @@ class Game {
                 // ball's movement a bit.
                 ball.dx = -ball.dx;
             }
-            /*// Check for top wall collision.
-            if ((ball.y + ball.radius) >= this._max_y) {
-                this._game_over = true;
-            }*/
-            if (((ball.y - ball.radius) <= this._min_y) || ((ball.y + ball.radius) >= this._max_y)) {
+
+
+            if ((ball.y - ball.radius) <= this._min_y){
                 // Add a random number at the end to randomise the
                 // ball's movement a bit.
                 ball.dy = -ball.dy;
             }
+
+            if (((ball.maxX >= this._paddle.minX) && (ball.maxX <= this._paddle.maxX)) ||
+            ((ball.minX >= this._paddle.minX) && (ball.minX <= this._paddle.max))) {
+                // Within bounds for collision.
+                if (ball.maxY >= this._paddle.minY) {
+                    ball.dy = -Math.abs(ball.dy);
+                }
+            }
+
+            if ((ball.y + ball.radius) >= this._max_y) {
+                this._game_over = true;
+            }
+
 
             ball.move({ dt: dt });
             ball.draw();
@@ -109,13 +136,15 @@ class Game {
  * Class that defines the ball.
  */
 class Ball {
-    constructor({ context = null, x = 100, y = 100, radius = 10 }) {
+    constructor({ context = null, x = 100, y = 100, radius = 10, dx = 10, dy = 10}) {
         this._ctx = context;
         this._x = x; // X-Coordinate
         this._y = y; // Y-Coordinate
-        this._dx = 10; // X-Speed.
-        this._dy = 10; // Y-Speed.
+        this._dx = dx; // X-Speed.
+        this._dy = dy; // Y-Speed.
         this._radius = radius;
+        this._width = radius * 2;
+        this._height = radius * 2;
     }
 
     // Define setters.
@@ -130,6 +159,24 @@ class Ball {
     set radius(value) {
         this._radius = value;
     }
+
+    get minX() {
+        return this._x - (this._width / 2);
+    }
+
+    get maxX() {
+        return this._x + (this._width / 2);
+    }
+
+    get minY() {
+        return this._y - (this._height / 2);
+    }
+
+    get maxY() {
+        return this._y + (this._height / 2);
+    }
+
+
 
     // Define getters.
     get dx() {
