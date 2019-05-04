@@ -12,3 +12,6 @@ To see console logs, open up developer mode by pressing **F12** and then click o
 ### Controlling the paddle
 
 Use your computer's arrow keys to control the paddle. The right arrow will make your paddle head right, and your left arrow will make your paddle head left.
+
+## Coding Style Guide
+https://pmcl.net.au/embsw/Downloads/SoftwareStyleGuide.pdf
