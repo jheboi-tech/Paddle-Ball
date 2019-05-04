@@ -52,14 +52,30 @@ class Game {
         // Add objects to the ball.
         let ball = new Ball({
             canvas: this._canvas,
-            context: this._ctx
+            context: this._ctx,
+            radius: 30,
+            dx: 40,
+            dy: 10
         });
         this._balls.push(ball);
+
+        let ball2 = new Ball({
+            canvas: this._canvas,
+            context: this._ctx,
+            x: 40,
+            y: 60,
+            dx: -10,
+            dy: -10
+        });
+        this._balls.push(ball2);
 
         this._paddle = new Paddle({
             canvas: this._canvas,
             context: this._ctx,
-            speed: 20
+            speed: 20,
+            width: 60,
+            speed: 60,
+            height: 60
         });
 
         // Create the main boundaries.
@@ -85,15 +101,26 @@ class Game {
                 // ball's movement a bit.
                 ball.dx = -ball.dx;
             }
-            /*// Check for top wall collision.
-            if ((ball.y + ball.radius) >= this._max_y) {
-                this._game_over = true;
-            }*/
-            if (((ball.y - ball.radius) <= this._min_y) || ((ball.y + ball.radius) >= this._max_y)) {
+
+
+            if ((ball.y - ball.radius) <= this._min_y){
                 // Add a random number at the end to randomise the
                 // ball's movement a bit.
                 ball.dy = -ball.dy;
             }
+
+            if (((ball.maxX >= this._paddle.minX) && (ball.maxX <= this._paddle.maxX)) ||
+            ((ball.minX >= this._paddle.minX) && (ball.minX <= this._paddle.max))) {
+                // Within bounds for collision.
+                if (ball.maxY >= this._paddle.minY) {
+                    ball.dy = -Math.abs(ball.dy);
+                }
+            }
+
+            if ((ball.y + ball.radius) >= this._max_y) {
+                this._game_over = true;
+            }
+
 
             ball.move({ dt: dt });
             ball.draw();
@@ -106,113 +133,18 @@ class Game {
 }
 
 /**
- * This is the base game object. This is not the Game
- * itself, but a base objects for objects from within
- * the game. This encompasses:
- * - Ball
- * - Paddle
- * - Blocks
- *
- * Each have their own properties, however they will
- * share some similar properties, such as colour,
- * width, height, speed, position, collision enabled,
- * and more.
- *
- *  */
-class GameObject {
-    constructor({type=null, x=0, y=0, dx=0, dy=0,
-        width=10, height=10, colour="#000000",
-        type=gameObjectType.none, radius=10}) {
-        this._type = type;
-        this._x = x;
-        this._y = y;
-        this._dx = dx;
-        this._dy = dy;
-        this._radius = radius;
-        this._width = width;
-        this._height = height;
-        if (this._type === gameObjectType.ball) {
-            this._width = this._radius * 2;
-            this._height = this._radius * 2;
-        }
-
-        this._colour = colour;
-        this._collisionEnabled = false;
-    }
-
-    /**
-     * This method calculates this objects resultant
-     * velocity. It will not change the other object's
-     * velocity however.
-     * @param {*} gameObject The object to detect the
-     * calculate the collision against.
-     */
-    calculateCollision(gameObject) {
-
-    }
-
-    /**
-     * Calculate whether collision is occuring
-     * from the right of the object.
-     * @param {*} gameObject THe object we are detecting
-     * the collision from. We can treat this as a
-     * stationary object. Our object will bounce off
-     * this one.
-     */
-    detectCollisionFromRight(gameObject) {
-
-    }
-
-
-    /**
-     * Returns the minimum X position of the far left
-     * edge of the object's hitbox.
-     */
-    getMinX() {
-        return this.x - (this._width / 2);
-    }
-
-    /**
-     * Returns the maximum X position of the far right
-     * edge of the object's hitbox.
-     */
-    getMaxX() {
-        return this.x + (this._width / 2);
-    }
-
-    /**
-     * Returns the minimum Y position of the far bottom
-     * edge of the object's hitbox. (Because
-     * Y-coordinates are inverted i.e., 0 is the top,
-     * this means getMinY will return the bottom.)
-     */
-    getMinY() {
-        return this.y - (this._height / 2);
-    }
-
-    /**
-     * Returns the maximum Y position of the far top
-     * edge of the object's hitbox. (Because
-     * Y-coordinates are inverted, i.e., 0 is the top,
-     * this means getMaxY will return the top)
-     */
-    getMaxY() {
-        return this.y + (this._height / 2);
-    }
-
-
-}
-/**
  * Class that defines the ball.
  */
 class Ball {
-    constructor({ context = null, x = 100, y = 100, radius = 10 }) {
+    constructor({ context = null, x = 100, y = 100, radius = 10, dx = 10, dy = 10}) {
         this._ctx = context;
         this._x = x; // X-Coordinate
         this._y = y; // Y-Coordinate
-        this._dx = 10; // X-Speed.
-        this._dy = 10; // Y-Speed.
+        this._dx = dx; // X-Speed.
+        this._dy = dy; // Y-Speed.
         this._radius = radius;
+        this._width = radius * 2;
+        this._height = radius * 2;
     }
 
     // Define setters.
@@ -227,6 +159,24 @@ class Ball {
     set radius(value) {
         this._radius = value;
     }
+
+    get minX() {
+        return this._x - (this._width / 2);
+    }
+
+    get maxX() {
+        return this._x + (this._width / 2);
+    }
+
+    get minY() {
+        return this._y - (this._height / 2);
+    }
+
+    get maxY() {
+        return this._y + (this._height / 2);
+    }
+
+
 
     // Define getters.
     get dx() {
