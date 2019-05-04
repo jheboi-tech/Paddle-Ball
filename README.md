@@ -1,6 +1,7 @@
 # Paddle-Ball
 A simple paddle ball game written in Javascript and played through the browser.
-The original influence for the creation of this game can be at this link:
+
+The original influence for the creation of this game can be found at this link:
 https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript?fbclid=IwAR3H-l7qMvt5wvoOSQ34k-1ypRm-GJuT5IU8HRyoYFlwZEHqRVjVaabc6wo#Lesson_details
 
 ## How to start the game.
